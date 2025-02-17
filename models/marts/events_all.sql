@@ -1,0 +1,26 @@
+select 'mobile' as events_source,
+DEVICE_LOCALE_COUNTRY as COUNTRY_CODE,
+EVENT_NAME,
+ARRIVAL_TIMESTAMP,
+EVENT_TIMESTAMP,
+SESSION_ID,
+USER_ACCESS_TYPE,
+USER_ID,
+ITEM_ID,
+ITEM_TYPE,
+ITEM_TITLE
+from {{ref("stg_mobile_events")}}
+union all
+select 'web' as events_source,
+COUNTRY_CODE,
+EVENT_NAME,
+ARRIVAL_TIMESTAMP,
+EVENT_TIMESTAMP,
+SESSION_ID,
+USER_ACCESS_TYPE,
+USER_ID,
+ITEM_ID,
+ITEM_TYPE,
+ITEM_TITLE
+from {{ref("stg_web_events")}}
+order by EVENT_TIMESTAMP

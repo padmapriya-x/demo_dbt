@@ -1,0 +1,20 @@
+version: 2
+sources:
+  - name: events
+    database: dbt_db
+    schema: dbt_schema
+    tables:
+      - name: mobile_events
+        columns:
+          - name: session_id
+            tests:
+              - unique
+              - not_null
+      - name: web_events
+        columns:
+          - name: session_id
+            tests:
+              - unique
+              - not null
+
+ 
