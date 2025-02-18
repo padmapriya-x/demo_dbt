@@ -1,20 +1,23 @@
-with t1 as 
-(
-    select *,
-    date_trunc('day', EVENT_TIMESTAMP) as event_date
-    from {{ref("events_all")}}
+WITH t1 AS (
+    SELECT 
+        USER_ID,
+        ITEM_ID,
+        EVENT_NAME,
+        COUNTRY_CODE,
+        DATE_TRUNC('day', EVENT_TIMESTAMP) AS event_date
+    FROM {{ ref("events_all") }}
 ),
-t2 as 
-(
-    select event_date,
-    count(distinct USER_ID) as daily_active_users,
-    count(distinct (case when ITEM_ID is not null then USER_ID else '0' end))-1 as daily_active_learners,
-    count(distinct (case when EVENT_NAME = 'item-finished' then ITEM_ID else '0' end))-1 as content_completions,
-    count(distinct (case when EVENT_NAME = 'item-finished' then USER_ID else '0' end))-1 as content_completion_user_count,
-    count(distinct (case when COUNTRY_CODE in ('DE','AT','CH') 
-    and (DATEDIFF('day', event_date, current_date())) <= 29 
-    then USER_ID else '0' end)) as dach_active_user_count
-    from t1
-    group by 1
+t2 AS (
+    SELECT 
+        event_date,
+        COUNT(DISTINCT USER_ID) AS daily_active_users,
+        COUNT(DISTINCT CASE WHEN ITEM_ID IS NOT NULL THEN USER_ID END) AS daily_active_learners,
+        COUNT(DISTINCT CASE WHEN EVENT_NAME = 'item-finished' THEN ITEM_ID END) AS content_completions,
+        COUNT(DISTINCT CASE WHEN EVENT_NAME = 'item-finished' THEN USER_ID END) AS content_completion_user_count,
+        COUNT(distinct (case when COUNTRY_CODE in ('DE','AT','CH') 
+        and (DATEDIFF('day', event_date, current_date())) <= 29 
+        then USER_ID else '0' end)) as dach_active_user_count
+    FROM t1
+    GROUP BY event_date
 )
-select * from t2
+SELECT * FROM t2
